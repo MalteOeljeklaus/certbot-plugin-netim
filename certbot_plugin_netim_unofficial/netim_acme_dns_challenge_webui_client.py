@@ -64,7 +64,7 @@ def remove_dns_challenge(sess, domain):
     entry_count = len(tree.xpath('//form[@id="DEL_DNS"]/table/tr'))
     assert entry_count >= 0
     for i in range(1,entry_count+1):
-        if str(tree.xpath('//form[@id="DEL_DNS"]/table/tr['+str(i)+']/td[1]/text()')).find('_acme-challenge.'+domain)!=-1 and str(tree.xpath('//form[@id="DEL_DNS"]/table/tr['+str(i)+']/td[2]/text()'))=='TXT':
+        if str(tree.xpath('//form[@id="DEL_DNS"]/table/tr['+str(i)+']/td[1]/text()')).find('_acme-challenge.'+domain)!=-1 and str(tree.xpath('//form[@id="DEL_DNS"]/table/tr['+str(i)+']/td[2]/text()')[0]).find('TXT')!=-1:
             assert str(tree.xpath('//form[@id="DEL_DNS"]/table/tr['+str(i)+']/td[2]/text()')[0]).find('TXT')!=-1
             checkbox_name = tree.xpath('//form[@id="DEL_DNS"]/table/tr['+str(i)+']/td[4]/input')[0].attrib['name']
             page = sess.post('https://www.netim.com/direct/ajax/controller/E10_domain.php', data = {'':'',
@@ -84,11 +84,11 @@ def main():
     parser.add_argument('login', type=str, help='Account handle')
     parser.add_argument('password', type=str, help='Password')
     parser.add_argument('domain', type=str, help='Domain name')
-    parser.add_argument('challengevalue', type=str, default=None, help='ACME challenge value')
+    parser.add_argument('-challengevalue', type=str, default=None, help='ACME challenge value')
     args = parser.parse_args()
 
     sess = init_session()
-    assert login(sess=sess, login=args.login, pwd=args.pwd)
+    assert login(sess=sess, login=args.login, pwd=args.password)
     if args.createchallenge:
         assert args.challengevalue!=None, 'createchallenge requires challengevalue'
         assert create_dns_challenge(sess=sess, domain=args.domain, challengeval=args.challengevalue)
